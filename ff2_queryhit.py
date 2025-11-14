@@ -1,3 +1,4 @@
+# filter out query with low hit
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("infile")
