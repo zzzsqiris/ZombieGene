@@ -2,7 +2,7 @@
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("infile")
-parser.add_argument("--query_length_threshold", type=int, default=500, metavar='<int>')
+parser.add_argument("--query_length_threshold", type=int, default=200, metavar='<int>')
 args = parser.parse_args()
 
 query_length_threshold = args.query_length_threshold

@@ -2,7 +2,7 @@
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("infile")
-parser.add_argument("--hit_threshold", type=int, default=3, metavar='<int>')
+parser.add_argument("--hit_threshold", type=int, default=20, metavar='<int>')
 args = parser.parse_args()
 
 # hit_threshold = 3
