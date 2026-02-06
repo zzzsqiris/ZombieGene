@@ -1,6 +1,6 @@
 import math
 
-def blast_filter(infile, min_query_len=30, min_identity=70, len_fraction=0.2):
+def blast_filter(infile, min_query_len=30, min_identity=40, len_fraction=0.2): #alignmnent length
     results = []
 
     query_pass = False
@@ -95,8 +95,9 @@ def blast_filter(infile, min_query_len=30, min_identity=70, len_fraction=0.2):
                 
     return results
 
-def build_matrix(all_ids, pair_data):
-    sorted_ids = sorted(list(all_ids))
+
+def build_matrix(id_set, pair_data):
+    sorted_ids = sorted(list(id_set))
     matrix = []
     header = ["ID"] + sorted_ids
     matrix.append(header)
@@ -107,10 +108,12 @@ def build_matrix(all_ids, pair_data):
             if id1 == id2:
                 row.append(0.0)
             else:
-                val = pair_data.get((id1, id2)) or pair_data.get((id2, id1))
+                val = pair_data.get((id1, id2))
+                if val is None:
+                    val = pair_data.get((id2, id1))
                 if val is not None:
                     row.append(val)
                 else:
-                    row.append(1.0) 
+                    row.append(1.0)
         matrix.append(row)
     return matrix

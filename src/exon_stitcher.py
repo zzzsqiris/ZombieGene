@@ -119,11 +119,18 @@ for block in zombie_blocks:
             protein_id = line.replace(">", "").strip().split(".")[0]
             id_set.add(protein_id)
             
-        elif "Expect =" in line:
-            line = line.split("Expect =")
-            line = line[1].strip()
-            e_val = line.split(",")[0].strip()
-            e_val = float(e_val)
+        elif "Identities =" in line:
+            line = line.split("(")
+            line = line[1].split("%")[0] 
+            identity_val = int(line) / 100
+            
+            distance = 1 - (identity_val)
 
             if (query_id, protein_id) not in pair_data:
-                pair_data[(query_id, protein_id)] = e_val
+                pair_data[(query_id, protein_id)] = round(distance, 4)
+
+matrix = zombie_utils.build_matrix(id_set, pair_data)
+for row in matrix:
+    for x in row:
+        print(str(x), end="\t")
+    print()
