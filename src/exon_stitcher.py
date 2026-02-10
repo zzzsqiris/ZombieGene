@@ -15,23 +15,25 @@ args = parser.parse_args()
 d = {}
 with gzip.open(args.gff3_file, 'rt') as f:
     for line in f:
+        if line.startswith("#"):
+            continue
         line = line.rstrip()
         line = line.split('\t')
         if line [2] != 'CDS':
             continue
         
-        chr = line[0]   
-        ID = line[8].split("=")[1]
+        chr = line[0]
         sign = line[6]
         start = int(line[3])
         end = int(line[4])
+        attributes = line[8].split(';')
+        ID = ""
+        for attr in attributes:
+            if attr.startswith("locus_tag="):
+                ID = attr.split("=")[1]
         if ID not in d:
             d[ID] = [chr, sign, []]
         d[ID][2].append((start, end))
-
-    # for ID in d:
-    #     chr, sign, pos = d[ID]
-    #     print (ID, chr, sign, pos, sep = '\t')
 
 # store chromosome seq into dictionary
 chr_dict = {}
@@ -89,28 +91,23 @@ os.system(cmd_makedb)
 
 # BLAST compare
 blast_results = args.save_path + "X_marked.blast.out"
-cmd_compare = f"blastp -query {x_marked_fa} -db {x_marked_db} -out {blast_results} -evalue 1e-10"
+cmd_compare = f"blastp -query {x_marked_fa} -db {x_marked_db} -out {blast_results} -evalue 1e-10 -num_threads 4"
 os.system(cmd_compare)
 
 # blast filter
-# zombie = zombie_utils.blast_filter(blast_results)
-zombie_output_file = args.save_path + "zombie.txt" # 自动定义文件名
-zombie_blocks = zombie_utils.blast_filter(blast_results)
-
-#with open(zombie_output_file, 'w') as f:
-#    for block in zombie_blocks:
-#        f.write(block + "\n\n")
+zombie_output_file = args.save_path + "zombie.txt"
+zombie_utils.blast_filter(blast_results, zombie_output_file)
 
 # extract protein id pairs, E-value
 pair_data = {}
 id_set = set()
 
-for block in zombie_blocks:
-    lines = block.split('\n')
+with open(zombie_output_file, 'r') as f:
     query_id = ""
     protein_id = ""
     
-    for line in lines:
+    for line in f:
+        line = line.strip()
         if line.startswith("Query="):
             query_id = line.split("=")[1].strip().split(".")[0]
             id_set.add(query_id)
@@ -129,8 +126,9 @@ for block in zombie_blocks:
             if (query_id, protein_id) not in pair_data:
                 pair_data[(query_id, protein_id)] = round(distance, 4)
 
-matrix = zombie_utils.build_matrix(id_set, pair_data)
-for row in matrix:
-    for x in row:
-        print(str(x), end="\t")
-    print()
+matrix_file = args.save_path + "_matrix.txt"
+with open(matrix_file, 'w') as f:
+    matrix = zombie_utils.build_matrix(id_set, pair_data)
+    for row in matrix:
+        line = "\t".join(map(str, row)) + "\n"
+        f.write(line)

@@ -1,54 +1,54 @@
-import math
+def blast_filter(infile, outfile, min_query_len=50, min_identity=80, len_fraction=0.2, min_align_len=100): #alignmnent length
+    with open(outfile, 'w') as f_out:
 
-def blast_filter(infile, min_query_len=30, min_identity=40, len_fraction=0.2): #alignmnent length
-    results = []
+        query_pass = False
+        query_id = ""
+        # protein_pass = False
+        id_pass = False
+        fraction_pass = False
+        identity_pass = False
+        alignment_len_pass = False
+        X_pass = False
+        temp_store = []
 
-    query_pass = False
-    query_id = ""
-    protein_pass = False
-    id_pass = False
-    fraction_pass = False
-    identity_pass = False
-    X_pass = False
-    temp_store = []
+        with open(infile) as f:
+            for line in f:
+                line = line.rstrip()
+                # find new query
+                if line.startswith("Query="):
+                    query_pass = False
+                    query_id = line.split("=")[1].strip().split(".")[0]
+                    temp_store = [line]
+                    continue
+                
+                # query length filter
+                if line.startswith("Length=") and not query_pass:
+                    query_len = int(line.split("=")[1])
+                    if query_len >= min_query_len:
+                        query_pass = True
+                        # print(temp_store)
+                        # print(line)
+                    continue
+                if not query_pass:
+                    continue
+                
+                # reach new protein
+                if line.startswith(">"):
+                    # protein_pass = False
+                    id_pass = False
+                    fraction_pass = False
+                    identity_pass = False
+                    alignment_len_pass = False
+                    X_pass = False
+                    temp_store = [line]
 
-    with open(infile) as f:
-        for line in f:
-            line = line.rstrip()
-            # find new query
-            if line.startswith("Query="):
-                query_pass = False
-                query_id = line.split("=")[1].strip().split(".")[0]
-                temp_store = [line]
-                continue
-            
-            # query length filter
-            if line.startswith("Length=") and not query_pass:
-                query_len = int(line.split("=")[1])
-                if query_len >= min_query_len:
-                    query_pass = True
-                    # print(temp_store)
-                    # print(line)
-                continue
-            if not query_pass:
-                continue
-            
-            # reach new protein
-            if line.startswith(">"):
-                protein_pass = False
-                id_pass = False
-                fraction_pass = False
-                identity_pass = False
-                X_pass = False
-                temp_store = [line]
-
-                # filter out same id
-                prot_id = line.replace(">", "").strip().split(".")[0]
-                if prot_id != query_id:
-                    id_pass = True
-                continue
-            
-            if not protein_pass:
+                    # filter out same id
+                    prot_id = line.replace(">", "").strip().split(".")[0]
+                    if prot_id != query_id:
+                        id_pass = True
+                    continue
+                
+                #if not protein_pass:
                 temp_store.append(line)
 
                 # check protein fraction length
@@ -62,7 +62,14 @@ def blast_filter(infile, min_query_len=30, min_identity=40, len_fraction=0.2): #
                 
                 # check identity
                 if line.startswith(" Identities"):
-                    x = line.split()[3]
+                    parts = line.split()
+                    # check alignment length
+                    alignment_len = parts[2]
+                    alignment_length = int(alignment_len.split('/')[-1])
+                    if alignment_length >= min_align_len:
+                        alignment_len_pass = True
+
+                    x = parts[3]
                     x = x.replace(",", "")
                     x = x.replace("(", "")
                     x = x.replace("%", "")
@@ -78,22 +85,17 @@ def blast_filter(infile, min_query_len=30, min_identity=40, len_fraction=0.2): #
                         X_pass = True
                 
                 # if all pass, print
-                if id_pass and fraction_pass and identity_pass and X_pass:
-                    protein_pass = True
+                if id_pass and fraction_pass and identity_pass and alignment_len_pass and X_pass:
+                    #protein_pass = True
                     # print ("\n".join(temp_store))
                     header = f"Query= {query_id}\nLength= {query_len}\n"
                     block_content = header + "\n".join(temp_store)
                     
-                    results.append(block_content)
+                    f_out.write(block_content + "\n\n")
+                    id_pass = False
                     temp_store = []
                 continue
-
-            else:
-                #print(line)
-                if results:
-                    results[-1] += "\n" + line
-                
-    return results
+    return
 
 
 def build_matrix(id_set, pair_data):
