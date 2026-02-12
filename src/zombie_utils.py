@@ -119,3 +119,20 @@ def build_matrix(id_set, pair_data):
                     row.append(1.0)
         matrix.append(row)
     return matrix
+
+# read in matrix
+def read_matrix(file_path):
+    ids = []
+    all_dist = []
+    with open(file_path, 'r') as f:
+        header = f.readline().strip().split('\t')
+        ids = header[1:]
+        
+        for line in f:
+            row = line.strip().split('\t')
+            row_dist = [] 
+            for x in row[1:]:
+                row_dist.append(float(x))
+            
+            all_dist.append(row_dist)
+    return ids, all_dist
