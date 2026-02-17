@@ -1,3 +1,24 @@
+PAIRS = {
+    "A": "T", "T": "A", "C": "G", "G": "C",
+    "a": "t", "t": "a", "c": "g", "g": "c",
+}
+
+def complement (seq):
+    comp_seq = ""
+    if not isinstance(seq, str):
+        seq = "".join(seq)
+    for nt in seq:
+        comp_seq += (PAIRS[nt])
+    return comp_seq
+
+def rev_comp(seq):
+    if not isinstance(seq, str):
+        seq = "".join(seq)
+    comp_seq = complement(seq)
+    rev_comp_seq = comp_seq[::-1]
+    return rev_comp_seq
+
+
 def blast_filter(infile, outfile, min_query_len=50, min_identity=80, len_fraction=0.2, min_align_len=100): #alignmnent length
     with open(outfile, 'w') as f_out:
 
