@@ -11,7 +11,7 @@ matrix_values = np.array(data)
 Z = linkage(matrix_values, method='average')
 
 # cut into groups
-max_d = 0.3
+max_d = 0.2
 clusters = fcluster(Z, max_d, criterion='distance') 
 
 # write cluster result into file
@@ -30,6 +30,8 @@ for group_num in clusters:
         counter[group_num] = 0
     counter[group_num] += 1
 sorted_counter = sorted(counter.items(), key=lambda item: item[1], reverse=True)
+sorted_dict = dict(sorted(counter.items()))
+
 
 top_group = []
 for i in range(5):
@@ -51,5 +53,7 @@ sub_matrix = np.array(sub_data)
 Z_top5 = linkage(sub_matrix, method='average')
 
 # plot tree
+plt.figure(figsize=(15, 10))
 dendrogram(Z_top5, labels=[ids[i] for i in top_index], orientation='left')
+plt.savefig("./../build/top5_tree.png")
 plt.show()
