@@ -81,8 +81,13 @@ with open(x_marked_fa, 'w') as f_out:
             protein_seq.append(korflab.translate(exon))
 
         linked_protein = "X".join(protein_seq)
+        # clean_protein = re.sub(r'X+', 'X', linked_protein).strip("X") 
+        clean_protein = linked_protein
+        while "XX" in clean_protein:
+            clean_protein = clean_protein.replace("XX", "X")
+        clean_protein = clean_protein.strip("X")
         f_out.write(f">{ID.split(',')[0]}\n")
-        f_out.write(f"{linked_protein}\n")
+        f_out.write(f"{clean_protein}\n")
 
 # build BLAST data base
 x_marked_db = args.save_path + "X_marked_db"

@@ -1,3 +1,5 @@
+import gzip
+
 PAIRS = {
     "A": "T", "T": "A", "C": "G", "G": "C",
     "a": "t", "t": "a", "c": "g", "g": "c",
@@ -157,3 +159,31 @@ def read_matrix(file_path):
             
             all_dist.append(row_dist)
     return ids, all_dist
+
+# open compressed or uncompressed file
+def smart_open(filepath):
+    if filepath.endswith('.gz'):
+        return gzip.open(filepath, mode='rt')
+    else:
+        return open(filepath, mode='rt')
+    
+# read fasta file
+def read_fasta(filepath):
+    fasta_dict = {}
+    seq_id = ""
+    cur_seq = []
+
+    with smart_open(filepath) as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith(">"):
+                if seq_id:
+                    fasta_dict[seq_id] = "".join(cur_seq)
+                seq_id = line[1:].split()[0]
+                cur_seq = []
+            else:
+                cur_seq.append(line)
+        if seq_id:
+            fasta_dict[seq_id] = "".join(cur_seq)
+            
+    return fasta_dict
