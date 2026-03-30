@@ -1,7 +1,6 @@
 import argparse
 import gzip
 import korflab
-import iris_lib
 import zombie_utils
 import os
 
@@ -68,7 +67,7 @@ with open(x_marked_fa, 'w') as f_out:
         leftover = ""
         for exon in extron_seq:
             if sign == "-":
-                exon = iris_lib.rev_comp(exon)
+                exon = zombie_utils.rev_comp(exon)
             exon = leftover + exon
             remainder = len(exon) % 3
 
@@ -78,10 +77,9 @@ with open(x_marked_fa, 'w') as f_out:
                 leftover = exon[-remainder:]
                 exon = exon[:-remainder]
             
-            protein_seq.append(korflab.translate(exon))
+            protein_seq.append(korflab.translate(exon).replace("X", "A"))
 
         linked_protein = "X".join(protein_seq)
-        # clean_protein = re.sub(r'X+', 'X', linked_protein).strip("X") 
         clean_protein = linked_protein
         while "XX" in clean_protein:
             clean_protein = clean_protein.replace("XX", "X")
