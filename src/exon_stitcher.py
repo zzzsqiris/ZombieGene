@@ -12,6 +12,7 @@ args = parser.parse_args()
 
 # extract ID, chr, sign, pos from gff3 file
 d = {}
+first_parent = {}
 with gzip.open(args.gff3_file, 'rt') as f:
     for line in f:
         if line.startswith("#"):
@@ -26,13 +27,20 @@ with gzip.open(args.gff3_file, 'rt') as f:
         start = int(line[3])
         end = int(line[4])
         attributes = line[8].split(';')
+
         ID = ""
+        parent = ""
         for attr in attributes:
             if attr.startswith("locus_tag="):
                 ID = attr.split("=")[1]
+            if attr.startswith("Parent="):
+                parent = attr.split("=")[1]
         if ID not in d:
             d[ID] = [chr, sign, []]
-        d[ID][2].append((start, end))
+            first_parent[ID] = parent
+
+        if parent == first_parent[ID]:
+            d[ID][2].append((start, end))
 
 # store chromosome seq into dictionary
 chr_dict = {}
@@ -94,7 +102,7 @@ os.system(cmd_makedb)
 
 # BLAST compare
 blast_results = args.save_path + "X_marked.blast.out"
-cmd_compare = f"blastp -query {x_marked_fa} -db {x_marked_db} -out {blast_results} -evalue 1e-10 -num_threads 4"
+cmd_compare = f"blastp -query {x_marked_fa} -db {x_marked_db} -out {blast_results} -evalue 1e-10 -num_threads 8 -seg yes -max_target_seqs 50"
 os.system(cmd_compare)
 
 # blast filter
