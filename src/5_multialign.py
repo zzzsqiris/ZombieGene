@@ -2,7 +2,6 @@ import os
 import subprocess
 import argparse
 
-# 设置参数解析
 parser = argparse.ArgumentParser()
 parser.add_argument("input_dir")
 parser.add_argument("output_dir")

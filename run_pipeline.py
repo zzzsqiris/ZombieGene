@@ -57,5 +57,4 @@ def main():
     cmd6 = f"python3 src/6_find_interesting_groups.py {alignment_dir}"
     os.system(cmd6)
 
-if __name__ == "__main__":
-    main()
+main()
