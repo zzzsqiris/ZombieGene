@@ -109,37 +109,3 @@ os.system(cmd_compare)
 zombie_output_file = args.save_path + "zombie.txt"
 zombie_utils.blast_filter(blast_results, zombie_output_file)
 
-# extract protein id pairs, E-value
-pair_data = {}
-id_set = set()
-
-with open(zombie_output_file, 'r') as f:
-    query_id = ""
-    protein_id = ""
-    
-    for line in f:
-        line = line.strip()
-        if line.startswith("Query="):
-            query_id = line.split("=")[1].strip().split(".")[0]
-            id_set.add(query_id)
-            
-        elif line.startswith(">"):
-            protein_id = line.replace(">", "").strip().split(".")[0]
-            id_set.add(protein_id)
-            
-        elif "Identities =" in line:
-            line = line.split("(")
-            line = line[1].split("%")[0] 
-            identity_val = int(line) / 100
-            
-            distance = 1 - (identity_val)
-
-            if (query_id, protein_id) not in pair_data:
-                pair_data[(query_id, protein_id)] = round(distance, 4)
-
-matrix_file = args.save_path + "_matrix.txt"
-with open(matrix_file, 'w') as f:
-    matrix = zombie_utils.build_matrix(id_set, pair_data)
-    for row in matrix:
-        line = "\t".join(map(str, row)) + "\n"
-        f.write(line)

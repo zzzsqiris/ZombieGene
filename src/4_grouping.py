@@ -1,9 +1,16 @@
 import zombie_utils
 import os
+import argparse
 
-cluster_result = "./../build/hierarchy_clusters_results.txt" 
-x_marked_fa = "./../build/wholegenome.fa"  #./../build/save_path.fa
-output_dir = "./../build/group"
+parser = argparse.ArgumentParser()
+parser.add_argument("cluster_result")
+parser.add_argument("x_marked_fa")
+parser.add_argument("output_dir")
+args = parser.parse_args()
+
+cluster_result = args.cluster_result
+x_marked_fa = args.x_marked_fa
+output_dir = args.output_dir
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)

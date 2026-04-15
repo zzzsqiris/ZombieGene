@@ -1,8 +1,15 @@
 import os
 import subprocess
+import argparse
 
-input_dir = "./../build/group"
-output_dir = "./../build/multi_aln"
+# 设置参数解析
+parser = argparse.ArgumentParser()
+parser.add_argument("input_dir")
+parser.add_argument("output_dir")
+args = parser.parse_args()
+
+input_dir = args.input_dir
+output_dir = args.output_dir
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
